@@ -1,12 +1,20 @@
+#Johan David Gomez Gil
+#Sebastian Bustamante
+#Lenguajes 2 
+#2020
+
+
+
 from tkinter import ttk
 from tkinter import messagebox
-from tkinter import *
+from tkinter import END
 import sqlite3
+from logica import *
 
 
 class ventana:
 
-    database = 'BDD.db'
+    logica = Logica()
 
     paises = ['Colombia','Ecuador','Estados unidos','Mexico','Panama','Venezuela']
 
@@ -146,21 +154,23 @@ class ventana:
         Label(frameEnfermedades, text = 'Enfermedades: ').grid(row = 11, column = 0)
         Label(frameEnfermedades, text = 'Asignadas: ').grid(row = 11, column = 1)
         self.enfermedades = Listbox(frameEnfermedades)
-        self.enfermedades.insert(0, * self.getEnfermedades())
+        self.enfermedades.insert(0, * self.logica.getEnfermedades())
         self.enfermedades.grid(row = 12, column = 0)
         
         self.agregadas = Listbox(frameEnfermedades)
         self.agregadas.grid(row = 12, column = 1)
 
-        ttk.Button(frameEnfermedades, text = 'Asignar', command = self.asignarEnfermedad).grid(row = 13, column = 0)
-        ttk.Button(frameEnfermedades, text = 'Quitar', command = self.quitarEnfermedad).grid(row = 13, column = 1)
+        ttk.Button(frameEnfermedades, text = 'Asignar', 
+        command = lambda: self.logica.asignarEnfermedad(self.enfermedades,self.agregadas)).grid(row = 13, column = 0)
+        ttk.Button(frameEnfermedades, text = 'Quitar',
+         command = lambda: self.logica.quitarEnfermedad(self.enfermedades,self.agregadas)).grid(row = 13, column = 1)
 
         #----------------asignar sintomas-----------------------------------------
 
         Label(frameSintomas, text = 'Sintomas: ').grid(row =1, column=0)
         Label(frameSintomas, text = 'Asignados: ').grid(row = 1, column = 1)
         self.sintomas = Listbox(frameSintomas)
-        self.sintomas.insert(0, *self.getSintomas())
+        self.sintomas.insert(0, *self.logica.getSintomas())
         self.sintomas.grid(row = 2, column = 0)
 
         self.agregados = Listbox(frameSintomas)
@@ -168,8 +178,10 @@ class ventana:
 
 
 
-        ttk.Button(frameSintomas, text = 'Asignar', command = self.asignarSintoma).grid(row = 3, column = 0)
-        ttk.Button(frameSintomas, text = 'Quitar', command = self.quitarSintoma).grid(row = 3, column = 1)
+        ttk.Button(frameSintomas, text = 'Asignar',
+         command = lambda: self.logica.asignarSintoma(self.sintomas,self.agregados)).grid(row = 3, column = 0)
+        ttk.Button(frameSintomas, text = 'Quitar',
+         command = lambda: self.logica.quitarSintoma(self.sintomas,self.agregados)).grid(row = 3, column = 1)
 
 
 
@@ -178,107 +190,23 @@ class ventana:
         ttk.Button(self.wind, text = 'Registrar', command = self.crearPaciente).grid(row = 1, column =2, 
         pady = 3, rowspan = 3, sticky = W + E )
 
-    #------------------------Funciones-----------------------------------------------------------------   
-
-    def ejecutarConsulta(self,consulta, parametros = ()):
-        with sqlite3.connect(self.database) as conn:
-            cursor = conn.cursor()
-            resultados = cursor.execute(consulta, parametros)
-            conn.commit()
-        return resultados
-
-    def getEnfermedades(self):
-        consulta = 'SELECT * FROM Enfermedad'
-        filas = self.ejecutarConsulta(consulta)
-        enfermedades = []
-        for fila in filas:
-            enfermedades.append(fila[1])
-        return enfermedades
-
-
-    def asignarEnfermedad(self):
-        indice = self.enfermedades.curselection() #Devuelve un diccionario con la posicion del elemento
-        seleccion = (self.enfermedades.get(indice[0])) #Devuelve el valor en el indice
-        self.agregadas.insert(0,seleccion)
-        self.enfermedades.delete(indice[0])
-
-    def quitarEnfermedad(self):
-        indice = self.agregadas.curselection()
-        seleccion = (self.agregadas.get(indice[0]))
-        self.enfermedades.insert(0,seleccion)
-        self.agregadas.delete(indice[0])
-
-    def getSintomas(self):
-        consulta = 'SELECT * FROM Sintoma'
-        filas = self.ejecutarConsulta(consulta)
-        sintomas = []
-        for fila in filas:
-            sintomas.append(fila[1])
-        return sintomas
-
-    def asignarSintoma(self):
-        indice = self.sintomas.curselection()
-        seleccion = self.sintomas.get(indice[0])
-        self.agregados.insert(0, seleccion)
-        self.sintomas.delete(indice[0])
-
-    def quitarSintoma(self):
-        indice = self.agregados.curselection()
-        seleccion = self.agregados.get(indice[0])
-        self.sintomas.insert(0, seleccion)
-        self.agregados.delete(indice[0])
 
 #------------------------------Guardar todos los datos del paciente-------------------------
 
     def crearPaciente(self):
+
         try:
-        
             datosPaciente = [self.numDocumento.get(), self.tipoDocumento.get(),
-            self.nombre.get(), self.genero.get(),self.barrio.get(),self.ciudad.get(),
-            self.telefono.get(),self.ano.get(), self.profesion.get(), self.nacionalidad.get()]
+                self.nombre.get(), self.genero.get(),self.barrio.get(),self.ciudad.get(),
+                self.telefono.get(),self.ano.get(), self.profesion.get(), self.nacionalidad.get()]
 
-            crearPaciente = 'INSERT INTO Paciente VALUES(?,?,?,?,?,?,?,?,?,?)'
-            self.ejecutarConsulta(crearPaciente, datosPaciente)
-
-            enfermedades = self.agregadas.get(0,END)
-            idenEnfermedad = 'SELECT id FROM Enfermedad WHERE nombre = (?)'
-            asignarEnfermedad = 'INSERT INTO PacienteEnfermedad VALUES(?,?)'
-
-            sintomas = self.agregados.get(0,END)
-            idenSintoma = 'SELECT id FROM Sintoma WHERE descripcion = (?)'
-            asignarSintoma = 'INSERT INTO PacienteSintoma VALUES(?,?,?,?)'
-
-            for enfermedad in enfermedades:
-                param = [enfermedad]
-                res = self.ejecutarConsulta(idenEnfermedad,param)
-                lista = res.fetchall()
-                iden = lista[0][0]
-                param = [datosPaciente[0],iden]
-                self.ejecutarConsulta(asignarEnfermedad,param)
-
-            fecha =""
-            fecha = fecha + self.anoRegistro.get() + '-'+self.mesResgistro.get() +'-'+ self.diaRegistro.get()
-            temperatura = self.temperatura.get()
-
-            for sintoma in sintomas:
-                param = [sintoma]
-                res = self.ejecutarConsulta(idenSintoma,param)
-                lista = res.fetchall()
-                iden = lista[0][0]
-                param = [datosPaciente[0],iden,fecha,temperatura]
-                self.ejecutarConsulta(asignarSintoma,param)
+            self.logica.crearPaciente(datosPaciente,self.agregadas,self.agregados,
+            self.anoRegistro,self.mesResgistro,self.diaRegistro,self.temperatura)
 
             messagebox.showinfo(message = 'Registro guardado satisfactoriamente', title = 'Registro guardado')
+
         except sqlite3.OperationalError as errorSQL:
             mensaje = errorSQL
             messagebox.showerror(message = mensaje, title = 'Error')
         except:
             messagebox.showerror(message = 'Ha ocurrido un error inesperado', title = 'Error')
-
-        
-
-        
-
-        
-        
-        

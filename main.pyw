@@ -8,9 +8,6 @@ from vista import *
 from tkinter import Tk,mainloop
 
 
-def prueba():
-    print ('Principal')
-    #llenarBD(5)
 
 def interfaz():
     interfaz = Tk()
@@ -20,5 +17,5 @@ def interfaz():
 
 
 if __name__ == '__main__':
-    #prueba()
     interfaz()
+
