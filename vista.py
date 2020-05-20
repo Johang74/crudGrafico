@@ -6,6 +6,7 @@
 
 
 from tkinter import ttk
+from tkinter import Toplevel
 from tkinter import messagebox
 from tkinter import END
 import sqlite3
@@ -20,7 +21,7 @@ class ventana:
 
     def __init__(self, ventana):
         self.wind = ventana
-        self.wind.title('Pacientes')
+        self.wind.title('Covid-19')
 
         frame = LabelFrame(self.wind, text = 'DATOS DEL PACIENTE')
         frame.grid(row = 0, column = 0, padx = 6, pady = 20)
@@ -40,7 +41,7 @@ class ventana:
         self.wind.config(menu = self.barraMenu)
 
         self.archivo = Menu(self.barraMenu, tearoff = 0)
-        self.archivo.add_command(label = 'Nueva enfermedad' )
+        self.archivo.add_command(label = 'Nueva enfermedad', command = lambda: self.nuevaEnfermedad() )
         self.archivo.add_command(label = 'Nuevo sintoma')
         self.archivo.add_command(label = 'Exportar')
         self.archivo.add_command(label = 'Salir', command = self.wind.destroy)
@@ -210,3 +211,25 @@ class ventana:
             messagebox.showerror(message = mensaje, title = 'Error')
         except:
             messagebox.showerror(message = 'Ha ocurrido un error inesperado', title = 'Error')
+
+
+#----------------------------Funciones---------------------------------------------------
+
+    def nuevaEnfermedad(self):
+        nuevaEnfermedad = Toplevel()
+
+        frame = LabelFrame(nuevaEnfermedad,text = 'Datos')
+        frame.grid(row = 1, column = 1, padx = 6, pady = 20)
+
+        Label(frame, text = 'Nombre de la enfermedad: ').grid(row = 1, column = 1)
+        nombre = ttk.Entry(frame)
+        nombre.focus()
+        nombre.grid(row = 1, column = 2, pady =1) 
+
+        
+        ttk.Button(frame, text = 'Guardar', command = lambda: self.logica.nuevaEnfermedad(nombre.get())).grid(row = 2,
+        column = 1, pady = 2, padx=2)
+
+        ttk.Button(frame, text = 'Cancelar', command = lambda: nuevaEnfermedad.destroy()).grid(row = 2, column = 2, pady = 2, padx=2)
+
+

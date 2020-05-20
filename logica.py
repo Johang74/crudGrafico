@@ -90,3 +90,22 @@ class Logica:
             self.datos.ejecutarConsulta(asignarSintoma,param)
 
             
+#--------------------------------NUEVA ENFERMEDAD-----------------------------------------------------
+
+    def nuevaEnfermedad(self, nombre):
+
+        comprobar = 'SELECT * FROM Enfermedad WHERE nombre = {}'.format(nombre)
+
+        resultados = self.datos.ejecutarConsulta(comprobar)
+
+        res =[]
+
+        for resul in resultados:
+            res.append(resul[0])
+
+        print (res)
+
+        insertar = 'INSERT INTO Enfermedad VALUES (NULL,?)'
+
+        parametros = [str(nombre)]
+        #self.datos.ejecutarConsulta(insertar,parametros)

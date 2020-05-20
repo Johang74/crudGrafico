@@ -4,7 +4,7 @@
 #2020
 
 #from generador import *
-from vista import *
+from vista import ventana
 from tkinter import Tk,mainloop
 
 
